@@ -7,5 +7,12 @@ pub(crate) struct RapportTexte {
 }
 
 pub(crate) fn analyser_textes(valeurs: &[Option<String>]) -> RapportTexte {
-    todo!()
+    let mut rapport = RapportTexte {
+        total: valeurs.len(),
+        valeurs_nulles: 0,
+        textes_vides: 0,
+        textes_renseignes: 0,
+    };
+
+    rapport
 }
