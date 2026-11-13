@@ -5,6 +5,13 @@ pub(crate) struct RapportTexte {
     pub(crate) textes_vides: usize,
     pub(crate) textes_renseignes: usize,
 }
+#[derive(Debug, PartialEq)]
+pub(crate) enum ValeurAttribut {
+    Absente,
+    Nulle,
+    Text(String),
+    Autre,
+}
 
 pub(crate) fn analyser_textes(valeurs: &[Option<String>]) -> RapportTexte {
     let mut rapport = RapportTexte {
