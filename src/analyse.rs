@@ -51,7 +51,31 @@ pub(crate) fn analyser_textes(valeurs: &[Option<String>]) -> RapportTexte {
 }
 
 pub(crate) fn analyser_attributs(valeurs: &[ValeurAttribut]) -> RapportAttribut {
-    todo!()
+    let mut rapport = RapportAttribut {
+        total: valeurs.len(),
+        valeurs_absentes: 0,
+        valeurs_nulles: 0,
+        textes_vides: 0,
+        textes_renseignes: 0,
+        autres_types: 0,
+    };
+
+    for valeur in valeurs {
+        match valeur {
+            ValeurAttribut::Absente => rapport.valeurs_absentes += 1,
+            ValeurAttribut::Nulle => rapport.valeurs_nulles += 1,
+            ValeurAttribut::Text(texte) => {
+                if texte.trim().is_empty() {
+                    rapport.textes_vides += 1;
+                } else {
+                    rapport.textes_renseignes += 1;
+                }
+            }
+            ValeurAttribut::Autre => rapport.autres_types += 1,
+        }
+    }
+
+    rapport
 }
 
 #[cfg(test)]
