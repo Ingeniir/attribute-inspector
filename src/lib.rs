@@ -7,11 +7,20 @@ fn handle(req: Request) -> Result<Value, String> {
         (Kind::Command, "panel-state") => Ok(message_panneau("Prêt pour le développement.")),
 
         (Kind::Command, "test-panel") => {
-            host::notify("La commande test-panel a bien été exécutée.");
+            let valeurs = [
+                Some(String::from("École")),
+                None,
+                Some(String::from("")),
+                Some(String::from("    ")),
+                Some(String::from(" Mairie ")),
+            ];
 
-            Ok(message_panneau(
-                "Le panneau communique correctement avec Rust.",
-            ))
+            let rapport = analyse::analyser_textes(&valeurs);
+            let message = formater_rapport(&rapport);
+
+            host::notify(&message);
+
+            Ok(message_panneau(&message))
         }
 
         (_, id) => Err(format!("Commande inconnue : {id}")),
