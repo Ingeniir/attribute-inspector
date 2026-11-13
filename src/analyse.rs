@@ -5,6 +5,17 @@ pub(crate) struct RapportTexte {
     pub(crate) textes_vides: usize,
     pub(crate) textes_renseignes: usize,
 }
+
+#[derive(Debug, PartialEq)]
+pub(crate) struct RapportAttribut {
+    pub(crate) total: usize,
+    pub(crate) valeurs_absentes: usize,
+    pub(crate) valeurs_nulles: usize,
+    pub(crate) textes_vides: usize,
+    pub(crate) textes_renseignes: usize,
+    pub(crate) autres_types: usize,
+}
+
 #[derive(Debug, PartialEq)]
 pub(crate) enum ValeurAttribut {
     Absente,
@@ -37,6 +48,10 @@ pub(crate) fn analyser_textes(valeurs: &[Option<String>]) -> RapportTexte {
     }
 
     rapport
+}
+
+pub(crate) fn analyser_attributs(valeurs: &[ValeurAttribut]) -> RapportAttribut {
+    todo!()
 }
 
 #[cfg(test)]
