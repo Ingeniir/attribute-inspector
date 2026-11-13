@@ -1,3 +1,6 @@
+mod analyse;
+use crate::analyse::ValeurAttribut;
+
 use rustgis_plugin::{Kind, Request, Value, host, json};
 
 fn handle(req: Request) -> Result<Value, String> {
@@ -5,11 +8,20 @@ fn handle(req: Request) -> Result<Value, String> {
         (Kind::Command, "panel-state") => Ok(message_panneau("Prêt pour le développement.")),
 
         (Kind::Command, "test-panel") => {
-            host::notify("La commande test-panel a bien été exécutée.");
+            let valeurs = [
+                ValeurAttribut::Absente,
+                ValeurAttribut::Nulle,
+                ValeurAttribut::Text(String::from("École")),
+                ValeurAttribut::Text(String::from("   ")),
+                ValeurAttribut::Autre,
+            ];
 
-            Ok(message_panneau(
-            "Le panneau communique correctement avec Rust.",
-        ))
+            let rapport = analyse::analyser_attributs(&valeurs);
+            let message = formater_rapport(&rapport);
+
+            host::notify(&message);
+
+            Ok(message_panneau(&message))
         }
 
         (_, id) => Err(format!("Commande inconnue : {id}")),
@@ -26,6 +38,20 @@ fn message_panneau(message: &str) -> Value {
             }
         }
     })
+}
+
+fn formater_rapport(rapport: &analyse::RapportAttribut) -> String {
+    let message = format!(
+        "Analyse des données d'exemple\nTotal : {}\nValeurs absentes : {}\nValeurs nulles : {}\nTextes vides : {}\nTextes renseignés : {}\nAutres types : {}",
+        rapport.total,
+        rapport.valeurs_absentes,
+        rapport.valeurs_nulles,
+        rapport.textes_vides,
+        rapport.textes_renseignes,
+        rapport.autres_types,
+    );
+
+    message
 }
 
 rustgis_plugin::export!(handle);
@@ -58,5 +84,27 @@ mod tests {
             reponse["panel"]["items"]["status"]["text"].as_str(),
             Some("Test réussi")
         );
+    }
+
+    #[test]
+    fn construit_un_rapport_complet_pour_le_panneau() {
+        let valeurs = [
+            ValeurAttribut::Absente,
+            ValeurAttribut::Nulle,
+            ValeurAttribut::Text(String::from("École")),
+            ValeurAttribut::Text(String::from("   ")),
+            ValeurAttribut::Autre,
+        ];
+
+        let rapport = analyse::analyser_attributs(&valeurs);
+        let message = formater_rapport(&rapport);
+        let reponse = message_panneau(&message);
+
+        let attendu = "Analyse des données d'exemple\nTotal : 5\nValeurs absentes : 1\nValeurs nulles : 1\nTextes vides : 1\nTextes renseignés : 1\nAutres types : 1";
+
+        assert_eq!(
+            reponse["panel"]["items"]["status"]["text"].as_str(),
+            Some(attendu)
+        )
     }
 }
