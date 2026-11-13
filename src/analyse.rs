@@ -67,4 +67,30 @@ mod tests {
         assert_eq!(rapport.textes_vides, 0);
         assert_eq!(rapport.textes_renseignes, 0);
     }
+
+    #[test]
+    fn analyse_avec_les_variantes() {
+        let valeurs = [
+            ValeurAttribut::Absente,
+            ValeurAttribut::Nulle,
+            ValeurAttribut::Text(String::from("École")),
+            ValeurAttribut::Text(String::from("   ")),
+            ValeurAttribut::Autre,
+        ];
+
+        for valeur in &valeurs {
+            match valeur {
+                ValeurAttribut::Absente => println!("Attribut absent."),
+                ValeurAttribut::Nulle => println!("Attribut nul."),
+                ValeurAttribut::Text(texte) => {
+                    if texte.trim().is_empty() {
+                        println!("Valeur vide");
+                    } else {
+                        println!("Valeur : {texte}");
+                    }
+                }
+                ValeurAttribut::Autre => println!("Autre attribut"),
+            }
+        }
+    }
 }
