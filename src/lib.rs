@@ -41,7 +41,7 @@ fn message_panneau(message: &str) -> Value {
 
 fn formater_rapport(rapport: &analyse::RapportTexte) -> String {
     let message = format!(
-        "Analyse des données d'exemple\nTotal: {}\nValeurs nulles : {}\nTextes vides: {}\nTextes renseignés: {}",
+        "Analyse des données d'exemple\nTotal : {}\nValeurs nulles : {}\nTextes vides : {}\nTextes renseignés : {}",
         rapport.total, rapport.valeurs_nulles, rapport.textes_vides, rapport.textes_renseignes
     );
 
@@ -78,5 +78,25 @@ mod tests {
             reponse["panel"]["items"]["status"]["text"].as_str(),
             Some("Test réussi")
         );
+    }
+
+    #[test]
+    fn construit_un_rapport_complet_pour_le_panneau() {
+        let valeurs = [
+            Some(String::from("École")),
+            None,
+            Some(String::from("    ")),
+        ];
+
+        let rapport = analyse::analyser_textes(&valeurs);
+        let message = formater_rapport(&rapport);
+        let reponse = message_panneau(&message);
+
+        let attendu = "Analyse des données d'exemple\nTotal : 3\nValeurs nulles : 1\nTextes vides : 1\nTextes renseignés : 1";
+
+        assert_eq!(
+            reponse["panel"]["items"]["status"]["text"].as_str(),
+            Some(attendu)
+        )
     }
 }
