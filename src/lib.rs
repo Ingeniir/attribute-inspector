@@ -30,6 +30,15 @@ fn message_panneau(message: &str) -> Value {
     })
 }
 
+fn formater_rapport(rapport: &analyse::RapportTexte) -> String {
+    let message = format!(
+        "Analyse des données d'exemple\nTotal: {}\nValeurs nulles : {}\nTextes vides: {}\nTextes renseignés: {}",
+        rapport.total, rapport.valeurs_nulles, rapport.textes_vides, rapport.textes_renseignes
+    );
+
+    message
+}
+
 rustgis_plugin::export!(handle);
 
 // Hors wasm, le SDK importe `call`/`result`/`log` depuis l'hôte RustGIS, qui n'existent
