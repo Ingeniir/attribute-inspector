@@ -14,5 +14,20 @@ pub(crate) fn analyser_textes(valeurs: &[Option<String>]) -> RapportTexte {
         textes_renseignes: 0,
     };
 
+    for valeur in valeurs {
+        match valeur {
+            None => {
+                rapport.valeurs_nulles += 1;
+            }
+            Some(texte) => {
+                if texte.trim().is_empty() {
+                    rapport.textes_vides += 1;
+                } else {
+                    rapport.textes_renseignes += 1;
+                }
+            }
+        }
+    }
+
     rapport
 }
