@@ -132,4 +132,24 @@ mod tests {
             }
         }
     }
+
+    #[test]
+    fn test_fonction_analyse_attributs() {
+        let valeurs = [
+            ValeurAttribut::Absente,
+            ValeurAttribut::Nulle,
+            ValeurAttribut::Text(String::from("École")),
+            ValeurAttribut::Text(String::from("   ")),
+            ValeurAttribut::Autre,
+        ];
+
+        let rapport = analyser_attributs(&valeurs);
+
+        assert_eq!(rapport.total, 5);
+        assert_eq!(rapport.valeurs_absentes, 1);
+        assert_eq!(rapport.valeurs_nulles, 1);
+        assert_eq!(rapport.textes_vides, 1);
+        assert_eq!(rapport.textes_renseignes, 1);
+        assert_eq!(rapport.autres_types, 1);
+    }
 }
