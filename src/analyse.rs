@@ -1,3 +1,5 @@
+use rustgis_plugin::Value;
+
 #[derive(Debug, PartialEq)]
 pub(crate) struct RapportTexte {
     pub(crate) total: usize,
@@ -76,6 +78,22 @@ pub(crate) fn analyser_attributs(valeurs: &[ValeurAttribut]) -> RapportAttribut 
     }
 
     rapport
+}
+
+pub(crate) fn convertir_valeur(valeur: Option<&Value>) -> ValeurAttribut {
+    match valeur {
+        None => ValeurAttribut::Absente,
+        Some(valeur_json) => {
+            if valeur_json.is_null() {
+                ValeurAttribut::Nulle
+            } else {
+                match valeur_json.as_str() {
+                    Some(texte) => ValeurAttribut::Text(String::from(texte)),
+                    None => ValeurAttribut::Autre,
+                }
+            }
+        }
+    }
 }
 
 #[cfg(test)]
