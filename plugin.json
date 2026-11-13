@@ -1,0 +1,44 @@
+{
+    "id": "attribute-inspector",
+    "name": "Attribute Inspector",
+    "version": "0.1.0",
+    "description": "Diagnostic de la qualité des attributs des couches.",
+    "author": "Ingeniir",
+    "entry": "plugin.wasm",
+    "abi": 1,
+    "permissions": [],
+    "commands": [
+        {
+            "id": "panel-state",
+            "label": "Initialisier le panneau",
+            "help": "Afficher le message initial.",
+            "icon": "stats",
+            "params": "{}"
+        },
+        {
+            "id": "test-panel",
+            "label": "Tester le plugin",
+            "help": "Vérifie la communication entre le panneau et Rust.",
+            "icon": "stats",
+            "params": "{}"
+        }
+    ],
+    "panel": {
+        "title": "Attribute Inspector",
+        "icon": "stats",
+        "help": "Inspecter la qualité des attributs.",
+        "state": "panel-state",
+        "items": [
+            {
+                "kind": "text",
+                "id": "status",
+                "label": "État du plugin",
+                "text": "Prêt pour le développement."
+            },
+            {
+                "kind": "button",
+                "command": "test-panel"
+            }
+        ]
+    }
+}
