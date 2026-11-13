@@ -31,3 +31,23 @@ pub(crate) fn analyser_textes(valeurs: &[Option<String>]) -> RapportTexte {
 
     rapport
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn analyse_un_melange_de_valeurs() {
+        let valeurs = [
+            Some(String::from("École")),
+            None,
+            Some(String::from("")),
+            Some(String::from("    ")),
+            Some(String::from(" Mairie ")),
+        ];
+
+        let rapport = analyser_textes(&valeurs);
+
+        assert_eq!(rapport.total, 5);
+    }
+}
