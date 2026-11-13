@@ -50,4 +50,14 @@ mod tests {
 
         assert_eq!(rapport.total, 5);
     }
+
+    #[test]
+    fn analyse_avec_valeurs_vide() {
+        let rapport = analyser_textes(&[]);
+
+        assert_eq!(rapport.total, 0);
+        assert_eq!(rapport.valeurs_nulles, 0);
+        assert_eq!(rapport.textes_vides, 0);
+        assert_eq!(rapport.textes_renseignes, 0);
+    }
 }
