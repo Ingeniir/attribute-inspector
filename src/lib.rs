@@ -1,3 +1,5 @@
+mod analyse;
+
 use rustgis_plugin::{Kind, Request, Value, host, json};
 
 fn handle(req: Request) -> Result<Value, String> {
@@ -8,8 +10,8 @@ fn handle(req: Request) -> Result<Value, String> {
             host::notify("La commande test-panel a bien été exécutée.");
 
             Ok(message_panneau(
-            "Le panneau communique correctement avec Rust.",
-        ))
+                "Le panneau communique correctement avec Rust.",
+            ))
         }
 
         (_, id) => Err(format!("Commande inconnue : {id}")),
