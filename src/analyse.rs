@@ -96,6 +96,30 @@ pub(crate) fn convertir_valeur(valeur: Option<&Value>) -> ValeurAttribut {
     }
 }
 
+pub(crate) fn analyser_champ(
+    proprietes: &[Value],
+    nom_champ: &str,
+) -> Result<RapportAttribut, String> {
+    let mut attributs = Vec::new();
+
+    for (index, objet) in proprietes.iter().enumerate() {
+        if !objet.is_object() {
+            let message = format!(
+                "L'élément {} doit être un objet JSON d'attributs.",
+                index + 1
+            );
+            return Err(message);
+        }
+        let valeur = objet.get(nom_champ);
+        let attribut = convertir_valeur(valeur);
+        attributs.push(attribut);
+    }
+
+    let resultat = analyser_attributs(&attributs);
+
+    Ok(resultat)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -225,5 +249,112 @@ mod tests {
         let resultat = convertir_valeur(Some(&valeur));
 
         assert_eq!(resultat, ValeurAttribut::Text(String::from("   ")));
+    }
+
+    #[test]
+    fn analyse_un_texte_json_compose_d_espaces() {
+        let valeur_json = json!("   ");
+
+        let attribut = convertir_valeur(Some(&valeur_json));
+
+        let attributs = [attribut];
+
+        let rapport = analyser_attributs(&attributs);
+
+        assert_eq!(rapport.total, 1);
+        assert_eq!(rapport.textes_vides, 1);
+        assert_eq!(rapport.textes_renseignes, 0);
+    }
+
+    #[test]
+    fn detecte_un_champ_absent_des_proprietes() {
+        let proprietes = json!({
+            "nom": "École",
+            "description": null
+        });
+
+        let valeur = proprietes.get("adresse");
+
+        let attribut = convertir_valeur(valeur);
+
+        assert_eq!(attribut, ValeurAttribut::Absente);
+    }
+
+    #[test]
+    fn detecte_un_champ_nul_des_proprietes() {
+        let proprietes = json!({
+            "nom": "École",
+            "description": null
+        });
+
+        let valeur = proprietes.get("description");
+        let attribut = convertir_valeur(valeur);
+
+        assert_eq!(attribut, ValeurAttribut::Nulle);
+    }
+
+    #[test]
+    fn detecte_un_champ_renseigne_des_proprietes() {
+        let proprietes = json!({
+            "nom": "École",
+            "description": null
+        });
+
+        let valeur = proprietes.get("nom");
+        let attribut = convertir_valeur(valeur);
+
+        assert_eq!(attribut, ValeurAttribut::Text(String::from("École")));
+    }
+
+    #[test]
+    fn analyse_champ() {
+        let proprietes = [
+            json!({"nom": "École"}),
+            json!({"nom": null}),
+            json!({}),
+            json!({"nom": "   "}),
+            json!({"nom": 42}),
+        ];
+
+        let rapport = analyser_champ(&proprietes, "nom")
+            .expect("Ces objets d'attributs devraient être acceptés");
+
+        assert_eq!(rapport.total, 5);
+        assert_eq!(rapport.textes_renseignes, 1);
+        assert_eq!(rapport.textes_vides, 1);
+        assert_eq!(rapport.valeurs_absentes, 1);
+        assert_eq!(rapport.valeurs_nulles, 1);
+    }
+
+    #[test]
+    fn analyse_champ_complet() {
+        let proprietes = [
+            json!({"nom": "École", "categorie": "Public"}),
+            json!({"nom": "Mairie", "categorie": null}),
+            json!({"nom": "Bibliothèque"}),
+        ];
+
+        let rapport = analyser_champ(&proprietes, "categorie")
+            .expect("Ces objets d'attributs devraient être acceptés");
+
+        assert_eq!(rapport.total, 3);
+        assert_eq!(rapport.valeurs_absentes, 1);
+        assert_eq!(rapport.valeurs_nulles, 1);
+        assert_eq!(rapport.textes_vides, 0);
+        assert_eq!(rapport.textes_renseignes, 1);
+        assert_eq!(rapport.autres_types, 0);
+    }
+
+    #[test]
+    fn refuse_un_element_non_objet() {
+        let proprietes = [json!({"nom": "École"}), json!(42)];
+
+        let erreur = analyser_champ(&proprietes, "nom")
+            .expect_err("Un nombre ne doit pas être accepté comme objet d'attributs");
+
+        assert_eq!(
+            erreur,
+            String::from("L'élément 2 doit être un objet JSON d'attributs.")
+        );
     }
 }

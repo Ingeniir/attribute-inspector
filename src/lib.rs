@@ -8,15 +8,15 @@ fn handle(req: Request) -> Result<Value, String> {
         (Kind::Command, "panel-state") => Ok(message_panneau("Prêt pour le développement.")),
 
         (Kind::Command, "test-panel") => {
-            let valeurs = [
-                ValeurAttribut::Absente,
-                ValeurAttribut::Nulle,
-                ValeurAttribut::Text(String::from("École")),
-                ValeurAttribut::Text(String::from("   ")),
-                ValeurAttribut::Autre,
+            let proprietes = [
+                json!({"nom": "École"}),
+                json!({"nom": null}),
+                json!({}),
+                json!({"nom": "   "}),
+                json!({"nom": 42}),
             ];
 
-            let rapport = analyse::analyser_attributs(&valeurs);
+            let rapport = analyse::analyser_champ(&proprietes, "nom")?;
             let message = formater_rapport(&rapport);
 
             host::notify(&message);
@@ -88,15 +88,16 @@ mod tests {
 
     #[test]
     fn construit_un_rapport_complet_pour_le_panneau() {
-        let valeurs = [
-            ValeurAttribut::Absente,
-            ValeurAttribut::Nulle,
-            ValeurAttribut::Text(String::from("École")),
-            ValeurAttribut::Text(String::from("   ")),
-            ValeurAttribut::Autre,
+        let proprietes = [
+            json!({"nom": "École"}),
+            json!({"nom": null}),
+            json!({}),
+            json!({"nom": "   "}),
+            json!({"nom": 42}),
         ];
 
-        let rapport = analyse::analyser_attributs(&valeurs);
+        let rapport = analyse::analyser_champ(&proprietes, "nom")
+            .expect("L'analyse devrait réussir pour ces objets d'attributs valides");
         let message = formater_rapport(&rapport);
         let reponse = message_panneau(&message);
 
