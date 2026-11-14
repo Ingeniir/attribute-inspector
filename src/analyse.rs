@@ -96,10 +96,20 @@ pub(crate) fn convertir_valeur(valeur: Option<&Value>) -> ValeurAttribut {
     }
 }
 
-pub(crate) fn analyser_champ(proprietes: &[Value], nom_champ: &str) -> RapportAttribut {
+pub(crate) fn analyser_champ(
+    proprietes: &[Value],
+    nom_champ: &str,
+) -> Result<RapportAttribut, String> {
     let mut attributs = Vec::new();
 
-    for objet in proprietes {
+    for (index, objet) in proprietes.iter().enumerate() {
+        if !objet.is_object() {
+            let message = format!(
+                "L'élément {} doit être un objet JSON d'attributs.",
+                index + 1
+            );
+            return Err(message);
+        }
         let valeur = objet.get(nom_champ);
         let attribut = convertir_valeur(valeur);
         attributs.push(attribut);
@@ -107,7 +117,7 @@ pub(crate) fn analyser_champ(proprietes: &[Value], nom_champ: &str) -> RapportAt
 
     let resultat = analyser_attributs(&attributs);
 
-    resultat
+    Ok(resultat)
 }
 
 #[cfg(test)]
@@ -306,7 +316,8 @@ mod tests {
             json!({"nom": 42}),
         ];
 
-        let rapport = analyser_champ(&proprietes, "nom");
+        let rapport = analyser_champ(&proprietes, "nom")
+            .expect("Ces objets d'attributs devraient être acceptés");
 
         assert_eq!(rapport.total, 5);
         assert_eq!(rapport.textes_renseignes, 1);
@@ -323,7 +334,8 @@ mod tests {
             json!({"nom": "Bibliothèque"}),
         ];
 
-        let rapport = analyser_champ(&proprietes, "categorie");
+        let rapport = analyser_champ(&proprietes, "categorie")
+            .expect("Ces objets d'attributs devraient être acceptés");
 
         assert_eq!(rapport.total, 3);
         assert_eq!(rapport.valeurs_absentes, 1);
