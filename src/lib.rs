@@ -10,7 +10,9 @@ fn handle(req: Request) -> Result<Value, String> {
         (Kind::Command, "test-panel") => {
             let couches = host::layers()?;
 
-            let message = format!("Couches disponibles\n{:#?}", couches);
+            let couche_active = trouver_couche_active(&couches)?;
+
+            let message = format!("Couches disponibles\n{:#?}", couche_active);
 
             Ok(message_panneau(&message))
         }
@@ -62,6 +64,26 @@ fn trouver_couche_active(couches: &Value) -> Result<&Value, String> {
     }
 
     Err(format!("Aucune couche active trouvée"))
+}
+
+fn obtenir_id_couche(couche: &Value) -> Result<u64, String> {
+    let valeur_id = match couche.get("id") {
+        Some(valeur) => {
+            valeur
+        }
+        None => {
+            return Err(format!("champ absent"))
+        }
+    };
+
+    match valeur_id.as_u64() {
+        Some(id) => {
+            return Ok(id);
+        }
+        None => {
+            return Err(format!("champ présent, mais de type invalide"))
+        }
+    }
 }
 
 rustgis_plugin::export!(handle);
@@ -161,5 +183,32 @@ mod tests {
         let erreur = trouver_couche_active(&couches).expect_err("Une couche active doit être trouvée.");
 
         assert_eq!(erreur, "La réponse des couches doit être un tableau JSON.")
+    }
+
+    #[test]
+    fn obtenir_id_d_une_couche_valide() {
+        let couche = json!({"id": 20});
+
+        let id = obtenir_id_couche(&couche).expect("Un identifiant entier positif devrait être accepté");
+
+        assert_eq!(id, 20);
+    }
+
+    #[test]
+    fn refuse_une_couche_sans_identifiant() {
+        let couche = json!({"name": "Bâtiments"});
+
+        let id_erreur = obtenir_id_couche(&couche).expect_err("Un identifiant entier positif devrait être accepté");
+
+        assert_eq!(id_erreur, "champ absent");
+    }
+
+    #[test]
+    fn identifiant_couche_present_mais_invalide() {
+        let couche = json!({"id": "20"});
+
+        let id_erreur = obtenir_id_couche(&couche).expect_err("Un identifiant entier positif devrait être accepté");
+
+        assert_eq!(id_erreur, "champ présent, mais de type invalide")
     }
 }
