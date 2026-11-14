@@ -10,7 +10,7 @@
     "commands": [
         {
             "id": "panel-state",
-            "label": "Initialisier le panneau",
+            "label": "Initialiser le panneau",
             "help": "Afficher le message initial.",
             "icon": "stats",
             "params": "{}"

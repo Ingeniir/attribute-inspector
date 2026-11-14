@@ -1,7 +1,7 @@
 mod analyse;
 use crate::analyse::ValeurAttribut;
 
-use rustgis_plugin::{Kind, Request, Value, host, json};
+use rustgis_plugin::{Kind, Request, Value, json};
 
 fn handle(req: Request) -> Result<Value, String> {
     match (req.kind, req.id.as_str()) {
@@ -18,8 +18,6 @@ fn handle(req: Request) -> Result<Value, String> {
 
             let rapport = analyse::analyser_champ(&proprietes, "nom")?;
             let message = formater_rapport(&rapport);
-
-            host::notify(&message);
 
             Ok(message_panneau(&message))
         }
