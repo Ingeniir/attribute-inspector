@@ -1,23 +1,16 @@
 mod analyse;
 use crate::analyse::ValeurAttribut;
 
-use rustgis_plugin::{Kind, Request, Value, json};
+use rustgis_plugin::{Kind, Request, Value, host, json};
 
 fn handle(req: Request) -> Result<Value, String> {
     match (req.kind, req.id.as_str()) {
         (Kind::Command, "panel-state") => Ok(message_panneau("Prêt pour le développement.")),
 
         (Kind::Command, "test-panel") => {
-            let proprietes = [
-                json!({"nom": "École"}),
-                json!({"nom": null}),
-                json!({}),
-                json!({"nom": "   "}),
-                json!({"nom": 42}),
-            ];
+            let couches = host::layers()?;
 
-            let rapport = analyse::analyser_champ(&proprietes, "nom")?;
-            let message = formater_rapport(&rapport);
+            let message = format!("Couches disponibles\n{:#?}", couches);
 
             Ok(message_panneau(&message))
         }
