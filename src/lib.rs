@@ -138,4 +138,28 @@ mod tests {
 
         assert_eq!(couche_active["id"], json!(20));
     }
+
+    #[test]
+    fn signale_absence_de_couche_active() {
+        let couches = json!([
+            {"id": 10, "active": false},
+            {"id": 20, "active": false}
+        ]);
+
+        let erreur = trouver_couche_active(&couches).expect_err("Une couche active doit être trouvée.");
+
+        assert_eq!(erreur, "Aucune couche active trouvée")
+    }
+
+    #[test]
+    fn refuse_une_liste_de_couches_mal_formee() {
+        let couches = json!({
+            "id": 10,
+            "active": true
+        });
+
+        let erreur = trouver_couche_active(&couches).expect_err("Une couche active doit être trouvée.");
+
+        assert_eq!(erreur, "La réponse des couches doit être un tableau JSON.")
+    }
 }
