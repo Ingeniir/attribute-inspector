@@ -226,4 +226,59 @@ mod tests {
 
         assert_eq!(resultat, ValeurAttribut::Text(String::from("   ")));
     }
+
+    #[test]
+    fn analyse_un_texte_json_compose_d_espaces() {
+        let valeur_json = json!("   ");
+
+        let attribut = convertir_valeur(Some(&valeur_json));
+
+        let attributs = [attribut];
+
+        let rapport = analyser_attributs(&attributs);
+
+        assert_eq!(rapport.total, 1);
+        assert_eq!(rapport.textes_vides, 1);
+        assert_eq!(rapport.textes_renseignes, 0);
+    }
+
+    #[test]
+    fn detecte_un_champ_absent_des_proprietes() {
+        let proprietes = json!({
+            "nom": "École",
+            "description": null
+        });
+
+        let valeur = proprietes.get("adresse");
+
+        let attribut = convertir_valeur(valeur);
+
+        assert_eq!(attribut, ValeurAttribut::Absente);
+    }
+
+    #[test]
+    fn detecte_un_champ_nul_des_proprietes() {
+        let proprietes = json!({
+            "nom": "École",
+            "description": null
+        });
+
+        let valeur = proprietes.get("description");
+        let attribut = convertir_valeur(valeur);
+
+        assert_eq!(attribut, ValeurAttribut::Nulle);
+    }
+
+    #[test]
+    fn detecte_un_champ_renseigne_des_proprietes() {
+        let proprietes = json!({
+            "nom": "École",
+            "description": null
+        });
+
+        let valeur = proprietes.get("nom");
+        let attribut = convertir_valeur(valeur);
+
+        assert_eq!(attribut, ValeurAttribut::Text(String::from("École")));
+    }
 }
