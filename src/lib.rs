@@ -118,4 +118,24 @@ mod tests {
             Some(attendu)
         )
     }
+
+    #[test]
+    fn trouve_la_couche_active() {
+        let couches = json!([
+            {
+                "id": 10,
+                "name": "Première couche",
+                "active": false,
+            },
+            {
+                "id": 20,
+                "name": "Deuxième couche",
+                "active": true
+            }
+        ]);
+
+        let couche_active = trouver_couche_active(&couches).expect("Une couche active devrait être trouvée.");
+
+        assert_eq!(couche_active["id"], json!(20));
+    }
 }
