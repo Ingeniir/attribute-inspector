@@ -99,6 +99,7 @@ pub(crate) fn convertir_valeur(valeur: Option<&Value>) -> ValeurAttribut {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use rustgis_plugin::json;
 
     #[test]
     fn analyse_un_melange_de_valeurs() {
@@ -169,5 +170,60 @@ mod tests {
         assert_eq!(rapport.textes_vides, 1);
         assert_eq!(rapport.textes_renseignes, 1);
         assert_eq!(rapport.autres_types, 1);
+    }
+
+    #[test]
+    fn analyse_attribut_absent() {
+        let resultat = convertir_valeur(None);
+
+        assert_eq!(resultat, ValeurAttribut::Absente);
+    }
+
+    #[test]
+    fn analyse_attribut_null_explicite() {
+        let valeur = json!(null);
+        let resultat = convertir_valeur(Some(&valeur));
+
+        assert_eq!(resultat, ValeurAttribut::Nulle);
+    }
+
+    #[test]
+    fn analyse_attribut_renseigner() {
+        let valeur = json!("École");
+        let resultat = convertir_valeur(Some(&valeur));
+
+        assert_eq!(resultat, ValeurAttribut::Text(String::from("École")));
+    }
+
+    #[test]
+    fn analyse_attribut_texte_vide() {
+        let valeur = json!("");
+        let resultat = convertir_valeur(Some(&valeur));
+
+        assert_eq!(resultat, ValeurAttribut::Text(String::from("")));
+    }
+
+    #[test]
+    fn analyse_attribut_entier() {
+        let valeur = json!(42);
+        let resultat = convertir_valeur(Some(&valeur));
+
+        assert_eq!(resultat, ValeurAttribut::Autre);
+    }
+
+    #[test]
+    fn analyse_attribut_boolean() {
+        let valeur = json!(true);
+        let resultat = convertir_valeur(Some(&valeur));
+
+        assert_eq!(resultat, ValeurAttribut::Autre);
+    }
+
+    #[test]
+    fn analyse_attribut_espace() {
+        let valeur = json!("   ");
+        let resultat = convertir_valeur(Some(&valeur));
+
+        assert_eq!(resultat, ValeurAttribut::Text(String::from("   ")));
     }
 }
