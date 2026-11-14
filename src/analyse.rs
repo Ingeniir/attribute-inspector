@@ -314,4 +314,22 @@ mod tests {
         assert_eq!(rapport.valeurs_absentes, 1);
         assert_eq!(rapport.valeurs_nulles, 1);
     }
+
+    #[test]
+    fn analyse_champ_complet() {
+        let proprietes = [
+            json!({"nom": "École", "categorie": "Public"}),
+            json!({"nom": "Mairie", "categorie": null}),
+            json!({"nom": "Bibliothèque"}),
+        ];
+
+        let rapport = analyser_champ(&proprietes, "categorie");
+
+        assert_eq!(rapport.total, 3);
+        assert_eq!(rapport.valeurs_absentes, 1);
+        assert_eq!(rapport.valeurs_nulles, 1);
+        assert_eq!(rapport.textes_vides, 0);
+        assert_eq!(rapport.textes_renseignes, 1);
+        assert_eq!(rapport.autres_types, 0);
+    }
 }
