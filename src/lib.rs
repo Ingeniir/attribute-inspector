@@ -45,6 +45,25 @@ fn formater_rapport(rapport: &analyse::RapportAttribut) -> String {
     message
 }
 
+fn trouver_couche_active(couches: &Value) -> Result<&Value, String> {
+    let tableau = match couches.as_array() {
+        Some(tableau) => tableau,
+        None => {
+            return Err(format!("La réponse des couches doit être un tableau JSON."));
+        }
+    };
+
+    for couche in tableau {
+        if let Some(active) = couche.get("active") {
+            if active.as_bool() == Some(true) {
+                return Ok(couche);
+            }
+        }
+    }
+
+    Err(format!("Aucune couche active trouvée"))
+}
+
 rustgis_plugin::export!(handle);
 
 // Hors wasm, le SDK importe `call`/`result`/`log` depuis l'hôte RustGIS, qui n'existent
