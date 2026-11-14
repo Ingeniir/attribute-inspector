@@ -96,6 +96,20 @@ pub(crate) fn convertir_valeur(valeur: Option<&Value>) -> ValeurAttribut {
     }
 }
 
+pub(crate) fn analyser_champ(proprietes: &[Value], nom_champ: &str) -> RapportAttribut {
+    let mut attributs = Vec::new();
+
+    for objet in proprietes {
+        let valeur = objet.get(nom_champ);
+        let attribut = convertir_valeur(valeur);
+        attributs.push(attribut);
+    }
+
+    let resultat = analyser_attributs(&attributs);
+
+    resultat
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
