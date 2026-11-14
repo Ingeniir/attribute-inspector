@@ -14,7 +14,16 @@ fn handle(req: Request) -> Result<Value, String> {
 
             let id_couche = obtenir_id_couche(couche_active)?;
 
-            let message = format!("Couche active\nIdentifiant: {}", id_couche);
+            let donnees = host::call(
+                "host.features",
+                json!({
+                    "layer": id_couche,
+                    "selected": false,
+                    "limit": 10
+                })
+            )?;
+
+            let message = format!("Entités reçues — diagnostic limité à 10\n\n{:#?}", donnees);
 
             Ok(message_panneau(&message))
         }
