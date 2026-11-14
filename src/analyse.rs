@@ -295,4 +295,23 @@ mod tests {
 
         assert_eq!(attribut, ValeurAttribut::Text(String::from("École")));
     }
+
+    #[test]
+    fn analyse_champ() {
+        let proprietes = [
+            json!({"nom": "École"}),
+            json!({"nom": null}),
+            json!({}),
+            json!({"nom": "   "}),
+            json!({"nom": 42}),
+        ];
+
+        let rapport = analyser_champ(&proprietes, "nom");
+
+        assert_eq!(rapport.total, 5);
+        assert_eq!(rapport.textes_renseignes, 1);
+        assert_eq!(rapport.textes_vides, 1);
+        assert_eq!(rapport.valeurs_absentes, 1);
+        assert_eq!(rapport.valeurs_nulles, 1);
+    }
 }
