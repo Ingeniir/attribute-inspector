@@ -8,18 +8,13 @@ fn handle(req: Request) -> Result<Value, String> {
         (Kind::Command, "panel-state") => Ok(message_panneau("Prêt pour le développement.")),
 
         (Kind::Command, "test-panel") => {
-            let proprietes = [
-                json!({"nom": "École"}),
-                json!({"nom": null}),
-                json!({}),
-                json!({"nom": "   "}),
-                json!({"nom": 42}),
-            ];
+            let couches = host::layers()?;
 
-            let rapport = analyse::analyser_champ(&proprietes, "nom")?;
-            let message = formater_rapport(&rapport);
+            let couche_active = trouver_couche_active(&couches)?;
 
-            host::notify(&message);
+            let id_couche = obtenir_id_couche(couche_active)?;
+
+            let message = format!("Couche active\nIdentifiant: {}", id_couche);
 
             Ok(message_panneau(&message))
         }
@@ -52,6 +47,45 @@ fn formater_rapport(rapport: &analyse::RapportAttribut) -> String {
     );
 
     message
+}
+
+fn trouver_couche_active(couches: &Value) -> Result<&Value, String> {
+    let tableau = match couches.as_array() {
+        Some(tableau) => tableau,
+        None => {
+            return Err(format!("La réponse des couches doit être un tableau JSON."));
+        }
+    };
+
+    for couche in tableau {
+        if let Some(active) = couche.get("active") {
+            if active.as_bool() == Some(true) {
+                return Ok(couche);
+            }
+        }
+    }
+
+    Err(format!("Aucune couche active trouvée"))
+}
+
+fn obtenir_id_couche(couche: &Value) -> Result<u64, String> {
+    let valeur_id = match couche.get("id") {
+        Some(valeur) => {
+            valeur
+        }
+        None => {
+            return Err(format!("champ absent"))
+        }
+    };
+
+    match valeur_id.as_u64() {
+        Some(id) => {
+            return Ok(id);
+        }
+        None => {
+            return Err(format!("champ présent, mais de type invalide"))
+        }
+    }
 }
 
 rustgis_plugin::export!(handle);
@@ -107,5 +141,76 @@ mod tests {
             reponse["panel"]["items"]["status"]["text"].as_str(),
             Some(attendu)
         )
+    }
+
+    #[test]
+    fn trouve_la_couche_active() {
+        let couches = json!([
+            {
+                "id": 10,
+                "name": "Première couche",
+                "active": false,
+            },
+            {
+                "id": 20,
+                "name": "Deuxième couche",
+                "active": true
+            }
+        ]);
+
+        let couche_active = trouver_couche_active(&couches).expect("Une couche active devrait être trouvée.");
+
+        assert_eq!(couche_active["id"], json!(20));
+    }
+
+    #[test]
+    fn signale_absence_de_couche_active() {
+        let couches = json!([
+            {"id": 10, "active": false},
+            {"id": 20, "active": false}
+        ]);
+
+        let erreur = trouver_couche_active(&couches).expect_err("Une couche active doit être trouvée.");
+
+        assert_eq!(erreur, "Aucune couche active trouvée")
+    }
+
+    #[test]
+    fn refuse_une_liste_de_couches_mal_formee() {
+        let couches = json!({
+            "id": 10,
+            "active": true
+        });
+
+        let erreur = trouver_couche_active(&couches).expect_err("Une couche active doit être trouvée.");
+
+        assert_eq!(erreur, "La réponse des couches doit être un tableau JSON.")
+    }
+
+    #[test]
+    fn obtenir_id_d_une_couche_valide() {
+        let couche = json!({"id": 20});
+
+        let id = obtenir_id_couche(&couche).expect("Un identifiant entier positif devrait être accepté");
+
+        assert_eq!(id, 20);
+    }
+
+    #[test]
+    fn refuse_une_couche_sans_identifiant() {
+        let couche = json!({"name": "Bâtiments"});
+
+        let id_erreur = obtenir_id_couche(&couche).expect_err("Un identifiant entier positif devrait être accepté");
+
+        assert_eq!(id_erreur, "champ absent");
+    }
+
+    #[test]
+    fn identifiant_couche_present_mais_invalide() {
+        let couche = json!({"id": "20"});
+
+        let id_erreur = obtenir_id_couche(&couche).expect_err("Un identifiant entier positif devrait être accepté");
+
+        assert_eq!(id_erreur, "champ présent, mais de type invalide")
     }
 }

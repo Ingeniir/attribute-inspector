@@ -1,0 +1,64 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [2.3500, 48.8500]
+      },
+      "properties": {
+        "identifiant": 1,
+        "nom": "École",
+        "categorie": "Public"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [2.3550, 48.8500]
+      },
+      "properties": {
+        "identifiant": 2,
+        "nom": null,
+        "categorie": "Public"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [2.3600, 48.8500]
+      },
+      "properties": {
+        "identifiant": 3,
+        "categorie": "Privé"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [2.3650, 48.8500]
+      },
+      "properties": {
+        "identifiant": 4,
+        "nom": "   ",
+        "categorie": "Privé"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [2.3700, 48.8500]
+      },
+      "properties": {
+        "identifiant": 5,
+        "nom": 42,
+        "categorie": "Public"
+      }
+    }
+  ]
+}
