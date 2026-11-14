@@ -344,4 +344,17 @@ mod tests {
         assert_eq!(rapport.textes_renseignes, 1);
         assert_eq!(rapport.autres_types, 0);
     }
+
+    #[test]
+    fn refuse_un_element_non_objet() {
+        let proprietes = [json!({"nom": "École"}), json!(42)];
+
+        let erreur = analyser_champ(&proprietes, "nom")
+            .expect_err("Un nombre ne doit pas être accepté comme objet d'attributs");
+
+        assert_eq!(
+            erreur,
+            String::from("L'élément 2 doit être un objet JSON d'attributs.")
+        );
+    }
 }
