@@ -12,7 +12,9 @@ fn handle(req: Request) -> Result<Value, String> {
 
             let couche_active = trouver_couche_active(&couches)?;
 
-            let message = format!("Couches disponibles\n{:#?}", couche_active);
+            let id_couche = obtenir_id_couche(couche_active)?;
+
+            let message = format!("Couche active\nIdentifiant: {}", id_couche);
 
             Ok(message_panneau(&message))
         }
