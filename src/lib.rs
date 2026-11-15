@@ -97,6 +97,43 @@ fn obtenir_id_couche(couche: &Value) -> Result<u64, String> {
     }
 }
 
+fn extraire_proprietes(donnees: &Value) -> Result<Vec<Value>, String> {
+    let entites = match donnees.get("features") {
+        Some(valeur) => {
+            match valeur.as_array() {
+                Some(tableau) => {
+                    tableau
+                }
+                None => {
+                    return Err(format!("La valeur n'est pas un tableau"))
+                }
+            }
+        }
+        None => {
+            return Err(format!("champ features absent"));
+        }
+    };
+
+    let mut proprietes = Vec::new();
+
+    for (index, entite) in entites.iter().enumerate() {
+        match entite.get("properties") {
+            Some(valeur) => {
+                if valeur.is_object() {
+                    proprietes.push(valeur.clone());
+                } else {
+                    return Err(format!("properties de l'entité {} n'est pas un objet", index + 1))
+                }
+            }
+            None => {
+                return Err(format!("L'entité : {} ne contient pas de champ properties", index + 1));
+            }
+        }
+    }
+
+    Ok(proprietes)
+}
+
 rustgis_plugin::export!(handle);
 
 // Hors wasm, le SDK importe `call`/`result`/`log` depuis l'hôte RustGIS, qui n'existent
