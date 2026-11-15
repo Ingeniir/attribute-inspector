@@ -259,4 +259,50 @@ mod tests {
 
         assert_eq!(id_erreur, "champ présent, mais de type invalide")
     }
+
+    #[test]
+    fn extrait_les_proprietes_de_deux_entites() {
+        let donnees = json!({
+            "type": "FeatureCollection",
+            "features": [
+                {
+                    "type": "Feature",
+                    "geometry": null,
+                    "properties": {"nom": "École"}
+                },
+                {
+                    "type": "Feature",
+                    "geometry": null,
+                    "properties": {}
+                }
+            ]
+        });
+
+        let properties = extraire_proprietes(&donnees).expect("Un objet properties doit être présent.");
+
+        let resultat = vec![
+            json!({"nom": "École"}),
+            json!({}),
+        ];
+
+        assert_eq!(properties, resultat);
+    }
+
+    #[test]
+    fn refuse_des_proprietes_nulles() {
+        let donnees = json!({
+            "features": [
+                {
+                    "properties": {"nom": "École"}
+                },
+                {
+                    "properties": null
+                }
+            ]
+        });
+
+        let properties = extraire_proprietes(&donnees).expect_err("Des propriétés nulles devraient être refusées");
+
+        assert_eq!(properties, "properties de l'entité 2 n'est pas un objet");
+    }
 }
