@@ -1,5 +1,5 @@
 mod analyse;
-use crate::analyse::ValeurAttribut;
+use crate::analyse::{ValeurAttribut, analyser_champ};
 
 use rustgis_plugin::{Kind, Request, Value, host, json};
 
@@ -8,6 +8,7 @@ fn handle(req: Request) -> Result<Value, String> {
         (Kind::Command, "panel-state") => Ok(message_panneau("Prêt pour le développement.")),
 
         (Kind::Command, "test-panel") => {
+            let nom_champ = "nom";
             let couches = host::layers()?;
 
             let couche_active = trouver_couche_active(&couches)?;
@@ -23,7 +24,11 @@ fn handle(req: Request) -> Result<Value, String> {
                 })
             )?;
 
-            let message = format!("Entités reçues — diagnostic limité à 10\n\n{:#?}", donnees);
+            let proprietes = extraire_proprietes(&donnees)?;
+
+            let rapport = analyser_champ(&proprietes, nom_champ)?;
+
+            let message = formater_rapport(&rapport, nom_champ);
 
             Ok(message_panneau(&message))
         }
@@ -44,9 +49,10 @@ fn message_panneau(message: &str) -> Value {
     })
 }
 
-fn formater_rapport(rapport: &analyse::RapportAttribut) -> String {
+fn formater_rapport(rapport: &analyse::RapportAttribut, nom_champ: &str) -> String {
     let message = format!(
-        "Analyse des données d'exemple\nTotal : {}\nValeurs absentes : {}\nValeurs nulles : {}\nTextes vides : {}\nTextes renseignés : {}\nAutres types : {}",
+        "Analyse du champ \"{}\"\nPortée : entités reçues, requête limitée à 10\nTotal : {}\nValeurs absentes : {}\nValeurs nulles : {}\nTextes vides : {}\nTextes renseignés : {}\nAutres types : {}",
+        nom_champ,
         rapport.total,
         rapport.valeurs_absentes,
         rapport.valeurs_nulles,
@@ -178,10 +184,10 @@ mod tests {
 
         let rapport = analyse::analyser_champ(&proprietes, "nom")
             .expect("L'analyse devrait réussir pour ces objets d'attributs valides");
-        let message = formater_rapport(&rapport);
+        let message = formater_rapport(&rapport, "nom");
         let reponse = message_panneau(&message);
 
-        let attendu = "Analyse des données d'exemple\nTotal : 5\nValeurs absentes : 1\nValeurs nulles : 1\nTextes vides : 1\nTextes renseignés : 1\nAutres types : 1";
+        let attendu = "Analyse du champ \"nom\"\nPortée : entités reçues, requête limitée à 10\nTotal : 5\nValeurs absentes : 1\nValeurs nulles : 1\nTextes vides : 1\nTextes renseignés : 1\nAutres types : 1";
 
         assert_eq!(
             reponse["panel"]["items"]["status"]["text"].as_str(),
